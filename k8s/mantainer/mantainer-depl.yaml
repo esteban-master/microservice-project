@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mantainer-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mantainer
+  template: 
+    metadata:
+      labels:
+        app: mantainer
+    spec:
+      containers:
+      - name: mantainer
+        image: nestjs/mantainer
+        ports: 
+        - containerPort: 3000
+        envFrom:
+          - configMapRef:
+              name: mantainer-config-map
+        # volumeMounts:
+        #   - mountPath: 
+        #     name: 
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: mantainer-srv
+spec: 
+  selector: 
+    app: mantainer
+  ports:
+  - name: mantainer
+    protocol: TCP
+    port: 3000
+    targetPort: 3000
