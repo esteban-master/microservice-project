@@ -14,3 +14,11 @@ build:
         manual:
           - src: 'mantainer/scr/**/*.ts'
             dest: .
+    - image: nestjs/purchase-orders
+      context: purchase-orders
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'purchase-orders/scr/**/*.ts'
+            dest: .

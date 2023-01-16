@@ -16,4 +16,11 @@ spec:
             name: mantainer-srv
             port:
               number: 3000
+      - path: "/purchase-orders/?(.*)"
+        pathType: Prefix
+        backend:
+          service:
+            name: purchase-orders-srv
+            port:
+              number: 3000
     

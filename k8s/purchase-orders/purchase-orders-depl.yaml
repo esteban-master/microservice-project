@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: purchase-orders-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: purchase-orders
+  template: 
+    metadata:
+      labels:
+        app: purchase-orders
+    spec:
+      containers:
+      - name: purchase-orders
+        image: nestjs/purchase-orders
+        ports: 
+        - containerPort: 3000
+        envFrom:
+          - configMapRef:
+              name: purchase-orders-config-map
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: purchase-orders-srv
+spec: 
+  selector: 
+    app: purchase-orders
+  ports:
+  - name: purchase-orders
+    protocol: TCP
+    port: 3000
+    targetPort: 3000
