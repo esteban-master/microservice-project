@@ -7,6 +7,7 @@ import { ProductsService } from './services/products.service';
 import { ProvidersService } from './services/providers.service';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaService } from './prisma.service';
+import { ProvidersController } from './controllers/providers.controller';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { PrismaService } from './prisma.service';
       }),
     }),
   ],
-  controllers: [EntitiesController, ProductsController],
+  controllers: [EntitiesController, ProvidersController, ProductsController],
   providers: [
     EntitiesService,
     ProductsService,

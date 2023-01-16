@@ -16,13 +16,15 @@ const entities = [
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.product.deleteMany()
+  await prisma.entity.deleteMany()
+  await prisma.provider.deleteMany()
   for (const product of products) {
     await prisma.product.create({
       data: product,
     });
   }
-
-  for (const entity of entities) {
+  for (const entity of entities) { 
     await prisma.entity.create({
       data: entity,
     });
