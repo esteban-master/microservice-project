@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { ArrayMinSize, IsArray, IsDate, IsNotEmpty, IsNumber, IsString, MinLength, ValidateNested } from 'class-validator';
 
 class LineDto {
@@ -8,14 +9,12 @@ class LineDto {
 
 export class CreatePurchaseOrderDto {
   @IsNotEmpty()
-  @IsDate()
   @IsString()
-  readonly issueDate: Date;
+  readonly issueDate: string;
 
   @IsNotEmpty()
-  @IsDate()
   @IsString()
-  readonly expirationDate: Date;
+  readonly expirationDate: string;
 
   @IsNotEmpty()
   @IsString()
@@ -26,5 +25,6 @@ export class CreatePurchaseOrderDto {
   @ArrayMinSize(1)
   @IsArray()
   @ValidateNested({ each: true })
+  @Type(() => LineDto)
   lines: LineDto[]
 }

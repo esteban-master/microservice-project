@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { PurchaseOrderService } from './purchase-order.service';
 import { CreatePurchaseOrderDto } from './dto/createPurchaseOrderDto';
 import { Ctx, EventPattern, Payload } from '@nestjs/microservices';
@@ -14,15 +14,23 @@ export class AppController {
   }
 
   @Post()
-  async create(createPurchaseOrderDto: CreatePurchaseOrderDto) {
+  async create(@Body() createPurchaseOrderDto: CreatePurchaseOrderDto) {
     return this.purchaseOrderService.create(createPurchaseOrderDto);
   }
 
   @EventPattern('product.create')
-  public async updatedCreatedEvent(
+  public async createdProductEvent(
     @Payload() data: { id: number, name: string, version: number },
     @Ctx() context: NatsJetStreamContext,
   ) {
     this.purchaseOrderService.createProduct(data, context);
+  }
+
+  @EventPattern('product.update')
+  public async updateProductEvent(
+    @Payload() data: any,
+    @Ctx() context: NatsJetStreamContext,
+  ) {
+    this.purchaseOrderService.editProduct(data, context);
   }
 }
