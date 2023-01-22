@@ -4,3 +4,4 @@ metadata:
   name: purchase-orders-config-map
 data: 
   DATABASE_URL: postgresql://esteban:misecreto@purchase-orders-postgres-srv:5432/purchase-orders?schema=public
+  NATS_URL: http://nats-srv:4222

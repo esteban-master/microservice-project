@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x", "debian-openssl-1.1.x", "linux-musl-openssl-3.0.x"]
 }
 
@@ -12,33 +12,34 @@ datasource db {
 }
 
 model PurchaseOrder {
-  id Int @id @default(autoincrement())
-  description String
-  createdAt    DateTime @default(now())
-  issueDate    DateTime
-  expirationDate    DateTime
-  purchaseOrderLines PurchaseOrderLine []
+  id                 Int                 @id @default(autoincrement())
+  description        String
+  createdAt          DateTime            @default(now())
+  issueDate          DateTime
+  expirationDate     DateTime
+  purchaseOrderLines PurchaseOrderLine[]
 }
 
 model Product {
-  id Int @id
-  name String
-  productLines ProductLine []
+  id          Int           @id
+  name        String
+  version     Int
+  productLine ProductLine[]
 }
 
 model ProductLine {
-  id Int @id @default(autoincrement())
-  product Product @relation(fields: [productId], references: [id])
-  productId Int
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int 
 
   purchaseOrderLine PurchaseOrderLine?
 }
 
 model PurchaseOrderLine {
-  id Int @id @default(autoincrement())
-  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  id              Int           @id @default(autoincrement())
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
   purchaseOrderId Int
 
-  productLine ProductLine @relation(fields: [productLineId], references: [id])
-  productLineId Int @unique
+  productLine   ProductLine @relation(fields: [productLineId], references: [id])
+  productLineId Int         @unique
 }

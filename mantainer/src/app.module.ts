@@ -5,9 +5,11 @@ import { ProductsController } from './controllers/products.controller';
 import { EntitiesService } from './services/entities.service';
 import { ProductsService } from './services/products.service';
 import { ProvidersService } from './services/providers.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaService } from './prisma.service';
 import { ProvidersController } from './controllers/providers.controller';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { NatsJetStreamClient, NatsJetStreamTransport } from '@nestjs-plugins/nestjs-nats-jetstream-transport';
 
 @Module({
   imports: [
@@ -16,7 +18,26 @@ import { ProvidersController } from './controllers/providers.controller';
       isGlobal: true,
       validationSchema: Joi.object({
         DATABASE_URL: Joi.string().required(),
+        NATS_URL: Joi.string().required()
       }),
+    }),
+    ClientsModule.registerAsync([
+      {
+        name: 'MANTAINER_SERVICE',
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.NATS,
+          options: {
+            servers: [configService.get('NATS_URL')],
+          },
+        }),
+        inject: [ConfigService],
+      },
+    ]),
+    NatsJetStreamTransport.register({
+      connectionOptions: {
+        servers: 'http://nats-srv:4222',
+        name: 'mantainer-publisher',
+      },
     }),
   ],
   controllers: [EntitiesController, ProvidersController, ProductsController],
@@ -25,6 +46,7 @@ import { ProvidersController } from './controllers/providers.controller';
     ProductsService,
     ProvidersService,
     PrismaService,
+    NatsJetStreamClient
   ],
 })
 export class AppModule {}

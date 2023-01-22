@@ -1,4 +1,6 @@
+import { NatsJetStreamContext } from '@nestjs-plugins/nestjs-nats-jetstream-transport';
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { CreatePurchaseOrderDto } from './dto/createPurchaseOrderDto';
 import { PrismaService } from './prisma.service';
 
@@ -7,7 +9,11 @@ export class PurchaseOrderService {
   constructor(private prisma: PrismaService) {}
 
   async all() {
-    return this.prisma.purchaseOrder.findMany();
+    const po = await this.prisma.purchaseOrder.findMany();
+    const products = await this.prisma.product.findMany();
+    return {
+      po, products
+    }
   }
 
   async create(createPurchaseOrder: CreatePurchaseOrderDto) {
@@ -34,5 +40,16 @@ export class PurchaseOrderService {
     //   },
     // })
     return {};
+  }
+
+  async createProduct(data: Prisma.ProductCreateInput, context: NatsJetStreamContext) {
+    await this.prisma.product.create({
+      data: {
+        name: data.name,
+        id: data.id,
+        version: data.version,
+      }
+    })
+    context.message.ack();
   }
 }
