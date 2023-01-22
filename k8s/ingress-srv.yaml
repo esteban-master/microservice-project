@@ -9,18 +9,25 @@ spec:
   rules:
   - http:
       paths:
-      - path: "/mantainer/?(.*)"
+      - path: "/api/mantainer/?(.*)"
         pathType: Prefix
         backend:
           service:
             name: mantainer-srv
             port:
               number: 3000
-      - path: "/purchase-orders/?(.*)"
+      - path: "/api/purchase-orders/?(.*)"
         pathType: Prefix
         backend:
           service:
             name: purchase-orders-srv
+            port:
+              number: 3000
+      - path: "/?(.*)"
+        pathType: Prefix
+        backend:
+          service:
+            name: client-srv
             port:
               number: 3000
     

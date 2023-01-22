@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ProvidersService } from 'src/services/providers.service';
 import { CreateProviderDto } from 'src/dto/createProviderDto';
 
-@Controller('mantainer/providers')
+@Controller('/api/mantainer/providers')
 export class ProvidersController {
   constructor(private readonly providerService: ProvidersService) {}
 

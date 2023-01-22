@@ -1,12 +1,13 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { PurchaseOrderService } from './purchase-order.service';
+import { PurchaseOrderService } from './services/purchase-order.service';
 import { CreatePurchaseOrderDto } from './dto/createPurchaseOrderDto';
 import { Ctx, EventPattern, Payload } from '@nestjs/microservices';
 import { NatsJetStreamContext } from '@nestjs-plugins/nestjs-nats-jetstream-transport';
+import { ProductService } from './services/product.service';
 
-@Controller('purchase-orders')
+@Controller('/api/purchase-orders')
 export class AppController {
-  constructor(private readonly purchaseOrderService: PurchaseOrderService) {}
+  constructor(private readonly purchaseOrderService: PurchaseOrderService, private readonly productService: ProductService) {}
 
   @Get()
   async all() {
@@ -23,7 +24,7 @@ export class AppController {
     @Payload() data: { id: number, name: string, version: number },
     @Ctx() context: NatsJetStreamContext,
   ) {
-    this.purchaseOrderService.createProduct(data, context);
+    this.productService.create(data, context);
   }
 
   @EventPattern('product.update')
@@ -31,6 +32,6 @@ export class AppController {
     @Payload() data: any,
     @Ctx() context: NatsJetStreamContext,
   ) {
-    this.purchaseOrderService.editProduct(data, context);
+    this.productService.edit(data, context);
   }
 }
