@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: purchase-orders-postgres-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: purchase-orders-postgres
+  template:
+    metadata:
+      labels:
+        app: purchase-orders-postgres
+    spec:
+      containers:
+        - name: purchase-orders-postgres
+          image: postgres
+          env:
+            - name: POSTGRES_USER
+              value: esteban
+            - name: POSTGRES_PASSWORD
+              value: misecreto
+            - name: POSTGRES_DB
+              value: purchase-orders
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: purchase-orders-postgres-srv
+spec:
+  selector:
+    app: purchase-orders-postgres
+  ports:
+    - name: db
+      protocol: TCP
+      port: 5432
+      targetPort: 5432 

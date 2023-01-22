@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: purchase-orders-config-map
 data: 
-  MONGO_URI: mongodb://purchase-orders-mongo-srv:27017/purchase-orders
+  DATABASE_URL: postgresql://esteban:misecreto@purchase-orders-postgres-srv:5432/purchase-orders?schema=public

@@ -1,10 +1,21 @@
 import { Module } from '@nestjs/common';
+import * as Joi from 'joi';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { PurchaseOrderService } from './purchase-order.service';
+import { PrismaService } from './prisma.service';
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({
+      ignoreEnvFile: true,
+      isGlobal: true,
+      validationSchema: Joi.object({
+        DATABASE_URL: Joi.string().required(),
+      }),
+    }),
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [PurchaseOrderService, PrismaService],
 })
 export class AppModule {}

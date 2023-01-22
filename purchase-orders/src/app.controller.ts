@@ -1,12 +1,18 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Post } from '@nestjs/common';
+import { PurchaseOrderService } from './purchase-order.service';
+import { CreatePurchaseOrderDto } from './dto/createPurchaseOrderDto';
 
 @Controller('purchase-orders')
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly purchaseOrderService: PurchaseOrderService) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  async all() {
+    return this.purchaseOrderService.all();
+  }
+
+  @Post()
+  async create(createPurchaseOrderDto: CreatePurchaseOrderDto) {
+    return this.purchaseOrderService.create(createPurchaseOrderDto);
   }
 }
