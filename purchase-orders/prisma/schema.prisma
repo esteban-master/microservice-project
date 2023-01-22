@@ -29,14 +29,25 @@ model Product {
 
 model ProductLine {
   id        Int     @id @default(autoincrement())
+  createdAt          DateTime            @default(now())
   product   Product @relation(fields: [productId], references: [id])
-  productId Int 
-
+  productId Int
+  line Line @relation(fields: [lineId], references: [id])
+  lineId Int @unique
   purchaseOrderLine PurchaseOrderLine?
+}
+
+model Line {
+  id Int @id @default(autoincrement())
+  createdAt          DateTime            @default(now())
+  price Float
+  quantity Float
+  productLine ProductLine?
 }
 
 model PurchaseOrderLine {
   id              Int           @id @default(autoincrement())
+  createdAt          DateTime            @default(now())
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
   purchaseOrderId Int
 

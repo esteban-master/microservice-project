@@ -13,7 +13,12 @@ export class PurchaseOrderService {
           select: {
             productLine: {
               select: {
-                product: {}
+                line: {},
+                product: {
+                  select: {
+                    name: true, id: true
+                  }
+                }
               }
             }
           }
@@ -33,9 +38,19 @@ export class PurchaseOrderService {
           create: lines.map(item => ({
             productLine: {
               create: {
-                productId: item.productId
+                product: {
+                  connect: {
+                    id: item.productId
+                  }
+                },
+                line: {
+                  create: {
+                    price: item.price, quantity: item.quantity
+                  },
+                }
               }
-            }}))
+            }
+          }))
         }
       }
     })
