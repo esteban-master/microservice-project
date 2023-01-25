@@ -9,6 +9,7 @@ export default function Document() {
         <div>
           <Link href="/">Home</Link>
           <Link href="/mantainer/products">Products</Link>
+          <Link href="/purchase-orders">Ordenes de compra</Link>
         </div>
         <Main />
         <NextScript />

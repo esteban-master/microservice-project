@@ -7,11 +7,19 @@ import { ProductService } from './services/product.service';
 
 @Controller('/api/purchase-orders')
 export class AppController {
-  constructor(private readonly purchaseOrderService: PurchaseOrderService, private readonly productService: ProductService) {}
+  constructor(
+    private readonly purchaseOrderService: PurchaseOrderService,
+    private readonly productService: ProductService,
+  ) {}
 
   @Get()
   async all() {
-    return this.purchaseOrderService.all();
+    const purchaseOrders = await this.purchaseOrderService.all();
+    const products = await this.productService.all();
+    return {
+      purchaseOrders,
+      products,
+    };
   }
 
   @Post()
@@ -21,7 +29,7 @@ export class AppController {
 
   @EventPattern('product.create')
   public async createdProductEvent(
-    @Payload() data: { id: number, name: string, version: number },
+    @Payload() data: { id: number; name: string; version: number },
     @Ctx() context: NatsJetStreamContext,
   ) {
     this.productService.create(data, context);

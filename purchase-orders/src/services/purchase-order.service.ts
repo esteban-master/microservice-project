@@ -16,15 +16,16 @@ export class PurchaseOrderService {
                 line: {},
                 product: {
                   select: {
-                    name: true, id: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }); 
+                    name: true,
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
   }
 
   async create(createPurchaseOrder: CreatePurchaseOrderDto) {
@@ -35,25 +36,26 @@ export class PurchaseOrderService {
         expirationDate: createPurchaseOrder.expirationDate,
         issueDate: createPurchaseOrder.issueDate,
         purchaseOrderLines: {
-          create: lines.map(item => ({
+          create: lines.map((item) => ({
             productLine: {
               create: {
                 product: {
                   connect: {
-                    id: item.productId
-                  }
+                    id: item.productId,
+                  },
                 },
                 line: {
                   create: {
-                    price: item.price, quantity: item.quantity
+                    price: item.price,
+                    quantity: item.quantity,
                   },
-                }
-              }
-            }
-          }))
-        }
-      }
-    })
-  return newPurchaseOrder;
+                },
+              },
+            },
+          })),
+        },
+      },
+    });
+    return newPurchaseOrder;
   }
 }

@@ -1,20 +1,29 @@
 import { Type } from 'class-transformer';
-import { ArrayMinSize, IsArray, IsPositive, IsNotEmpty, IsNumber, IsString, MinLength, ValidateNested } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsPositive,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
 
 class LineDto {
-    @IsNotEmpty()
-    @IsNumber()
-    readonly productId: number;
+  @IsNotEmpty()
+  @IsNumber()
+  readonly productId: number;
 
-    @IsNotEmpty()
-    @IsNumber()
-    @IsPositive()
-    readonly quantity: number;
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  readonly quantity: number;
 
-    @IsNotEmpty()
-    @IsNumber()
-    @IsPositive()
-    readonly price: number;
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  readonly price: number;
 }
 
 export class CreatePurchaseOrderDto {
@@ -36,5 +45,5 @@ export class CreatePurchaseOrderDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => LineDto)
-  lines: LineDto[]
+  lines: LineDto[];
 }

@@ -6,14 +6,6 @@ deploy:
       - ./k8s/*
 build:
   artifacts:
-    - image: nestjs/mantainer
-      context: mantainer
-      docker:
-        dockerfile: Dockerfile
-      sync:
-        manual:
-          - src: 'mantainer/scr/**/*.ts'
-            dest: .
     - image: nestjs/purchase-orders
       context: purchase-orders
       docker:
@@ -21,6 +13,14 @@ build:
       sync:
         manual:
           - src: 'purchase-orders/scr/**/*.ts'
+            dest: .
+    - image: nestjs/mantainer
+      context: mantainer
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'mantainer/scr/**/*.ts'
             dest: .
     - image: client-app
       context: client
