@@ -12,6 +12,11 @@ export class ProductsController {
     return this.productsService.all();
   }
 
+  @Get('/:id')
+  getProduct(@Param('id') id: string) {
+    return this.productsService.findUnique({ id: Number(id) });
+  }
+
   @Post()
   create(@Body() product: CreateProductDto) {
     return this.productsService.create(product);

@@ -2,8 +2,10 @@ import { useState } from "react";
 // import useSWR from "swr";
 // import useSWRMutation from "swr/mutation";
 import axios from "axios";
-import { useFieldArray, useForm, get, Controller } from "react-hook-form";
-
+import { useFieldArray, useForm, get, useWatch } from "react-hook-form";
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -14,10 +16,7 @@ import { Autocomplete, Grid, Stack } from "@mui/material";
 import * as Yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup'
 import { ErrorMessage } from '@hookform/error-message';
-
-async function createPurchaseOrder(url: string, { arg }: any) {
-  const { data } = await axios.post(url, arg);
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const getPurchaseOrders = async () => {
   const { data } = await axios.get('/api/purchase-orders');
@@ -25,19 +24,20 @@ const getPurchaseOrders = async () => {
 }
 
 const validationSchema = Yup.object({
-  description: Yup.string(),
+  description: Yup.string().required(),
   issueDate: Yup.string().required(),
   expirationDate: Yup.string().required(),
   lines: Yup.array().min(1).of(
     Yup.object({
-      productId: Yup.number().min(1).required(),
-      price: Yup.number().min(1, 'El minimo es 1').required('El precio es requerido'),
-      quantity: Yup.number().min(1).required(),
+      productId: Yup.number().positive('Seleccione un producto').integer().required('El producto es requerido'),
+      price: Yup.number().positive().integer().min(1, 'El minimo es 1').required('El precio es requerido'),
+      quantity: Yup.number().positive().integer().min(1,  'El minimo es 1').required('La cantidad es requerida'),
     })
   ) 
 })
 
 export default function PurchaseOrders() {
+  const queryClient = useQueryClient()
   const { data, isLoading } = useQuery({
     queryKey: ['purchase-orders'],
     queryFn: getPurchaseOrders 
@@ -54,10 +54,19 @@ export default function PurchaseOrders() {
     resolver: yupResolver(validationSchema),
     defaultValues: {
       description: '',
-      "expirationDate": "2023-01-25T16:23:17.912Z",
-      "issueDate": "2023-01-22T16:23:17.912Z",
-      lines: [{ "productId": '', "price": '', "quantity": '' }]
+      expirationDate: new Date().toISOString(),
+      issueDate: new Date().toISOString(),
+      lines: [{ "productId": '0', "price": '0', "quantity": '0' }]
     },
+  });
+
+  const issueDate = useWatch({
+    control,
+    name: "issueDate",
+  });
+  const expirationDate = useWatch({
+    control,
+    name: "expirationDate",
   });
   console.log({ data, get: get(errors, 'description'), errors })
 
@@ -82,8 +91,14 @@ export default function PurchaseOrders() {
   };
 
   const handleCreate = async (data: any) => {
+    console.log({ data })
     try {
-      mutation.mutate(data);
+      mutation.mutate(data, {
+        onSuccess({ data }, variables, context) {
+          queryClient.setQueryData(['purchase-orders'], (old: any) => old.concat(data))
+          queryClient.setQueryData(['purchase-orders', data.id], data)
+        },
+      });
       handleClose();
     } catch (e) {
       // error handling
@@ -104,6 +119,7 @@ export default function PurchaseOrders() {
         <form onSubmit={handleSubmit(handleCreate)}>
           <DialogContent>
             <TextField
+              error={Boolean(get(errors, 'description'))}
               margin="dense"
               id="name"
               label="Descripcion"
@@ -113,7 +129,43 @@ export default function PurchaseOrders() {
               {...register("description")}
               helperText={<ErrorMessage errors={errors} name="description" />}
             />
-            {fieldArray.fields.map((field, index) => (
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DesktopDatePicker
+                label="Fecha emision"
+                inputFormat="dd-MM-yyyy"
+                value={issueDate}
+                onChange={(e) => {
+                  if (e) {
+                    setValue('issueDate', new Date(e).toISOString())
+                  }
+                }}
+                renderInput={(params) =>
+                  <TextField
+                    {...params} 
+                    error={Boolean(get(errors, 'issueDate'))}
+                    helperText={<ErrorMessage errors={errors} name="issueDate" />}
+                  />
+                }
+              />
+              <DesktopDatePicker
+                label="Fecha vencimiento"
+                inputFormat="dd-MM-yyyy"
+                value={expirationDate}
+                onChange={(e) => {
+                  if (e) {
+                    setValue('expirationDate', new Date(e).toISOString())
+                  }
+                }}
+                renderInput={(params) =>
+                  <TextField
+                    {...params} 
+                    error={Boolean(get(errors, 'expirationDate'))}
+                    helperText={<ErrorMessage errors={errors} name="expirationDate" />}
+                  />
+                }
+              />
+            </LocalizationProvider>
+            {fieldArray.fields.map((_, index) => (
               <Stack>
                 <Autocomplete
                   disablePortal
@@ -124,7 +176,12 @@ export default function PurchaseOrders() {
                   onChange={(_, selected) => {
                     setValue(`lines.${index}.productId`, selected.id)
                   }}
-                  renderInput={(params) => <TextField {...params} label="Product" />}
+                  renderInput={(params) => <TextField 
+                    {...params}
+                    label="Product"
+                    error={Boolean(get(errors,`lines.${index}.productId`))}
+                    helperText={<ErrorMessage errors={errors} name={`lines.${index}.productId`} />} 
+                  />}
                 />
                 <TextField
                   margin="dense"
@@ -133,6 +190,7 @@ export default function PurchaseOrders() {
                   type="number"
                   fullWidth
                   variant="standard"
+                  error={Boolean(get(errors, `lines.${index}.price`))}
                   {...register(`lines.${index}.price`)}
                   helperText={<ErrorMessage errors={errors} name={`lines.${index}.price`} />}
                 />
@@ -143,7 +201,9 @@ export default function PurchaseOrders() {
                   type="number"
                   fullWidth
                   variant="standard"
+                  error={Boolean(get(errors, `lines.${index}.quantity`))}
                   {...register(`lines.${index}.quantity`)}
+                  helperText={<ErrorMessage errors={errors} name={`lines.${index}.quantity`} />}
                 />
                 <Button
                   onClick={() => fieldArray.remove(index)}  
@@ -154,9 +214,9 @@ export default function PurchaseOrders() {
             ))}
             <Button
               onClick={() => fieldArray.append({
-                quantity: '',
-                price: '',
-                productId: "",
+                quantity: '0',
+                price: '0',
+                productId: '0',
               })}  
             >
               Otra linea
