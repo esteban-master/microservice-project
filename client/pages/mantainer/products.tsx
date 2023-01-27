@@ -1,6 +1,4 @@
 import { useState } from "react";
-import useSWR from "swr";
-import useSWRMutation from "swr/mutation";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 
@@ -10,17 +8,18 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-async function createProduct(url: string, { arg }: any) {
-  const { data } = await axios.post("/api/mantainer/products", arg);
+const fetcher = async () => {
+  const { data } = await axios.get('/api/mantainer/products');
   return data;
-}
+};
 
 export default function Products() {
-  const { data, isLoading } = useSWR<
-    { name: string; id: number; code: string }[]
-  >("/api/mantainer/products", fetcher);
+  const { data, isLoading } = useQuery({
+    queryKey: ['mantainer/products'],
+    queryFn: fetcher,
+  })
   const {
     register,
     handleSubmit,
@@ -31,10 +30,11 @@ export default function Products() {
       code: "",
     },
   });
-  const { trigger, isMutating } = useSWRMutation(
-    "/api/mantainer/products",
-    createProduct /* options */
-  );
+  const mutation = useMutation({
+    mutationFn: async (data) => {
+      return await axios.post('/api/purchase-orders', data)
+    }
+  });
 
   const [open, setOpen] = useState(false);
   const handleClickOpen = () => {
@@ -47,9 +47,14 @@ export default function Products() {
 
   const handleCreate = async (data: any) => {
     try {
-      await trigger(data /* options */);
-      handleClose();
+      mutation.mutate(data, {
+        onSuccess(data, variables, context) {
+          console.log({ data, variables, context })
+          handleClose();
+        },
+      });
     } catch (e) {
+      console.log({ e })
       // error handling
     }
   };
@@ -94,7 +99,7 @@ export default function Products() {
       </Dialog>
       <ul>
         {data
-          ? data.map((item) => (
+          ? data.map((item: any) => (
               <li key={item.id}>
                 {item.name} - {item.code}
               </li>
