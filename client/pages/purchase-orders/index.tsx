@@ -1,6 +1,6 @@
 import { useState } from "react";
-import useSWR from "swr";
-import useSWRMutation from "swr/mutation";
+// import useSWR from "swr";
+// import useSWRMutation from "swr/mutation";
 import axios from "axios";
 import { useFieldArray, useForm, get, Controller } from "react-hook-form";
 
@@ -14,9 +14,13 @@ import { Autocomplete, Grid, Stack } from "@mui/material";
 import * as Yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup'
 import { ErrorMessage } from '@hookform/error-message';
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 async function createPurchaseOrder(url: string, { arg }: any) {
   const { data } = await axios.post(url, arg);
+import { useMutation, useQuery } from "@tanstack/react-query";
+
+const getPurchaseOrders = async () => {
+  const { data } = await axios.get('/api/purchase-orders');
   return data;
 }
 
@@ -34,7 +38,11 @@ const validationSchema = Yup.object({
 })
 
 export default function PurchaseOrders() {
-  const { data, isLoading } = useSWR("/api/purchase-orders", fetcher);
+  const { data, isLoading } = useQuery({
+    queryKey: ['purchase-orders'],
+    queryFn: getPurchaseOrders 
+  })
+
   const {
     register,
     handleSubmit,
@@ -58,10 +66,11 @@ export default function PurchaseOrders() {
     name: "lines",
   });
 
-  const { trigger, isMutating } = useSWRMutation(
-    "/api/purchase-orders",
-    createPurchaseOrder /* options */
-  );
+  const mutation = useMutation({
+    mutationFn: async (data) => {
+      return axios.post('/api/purchase-orders', data)
+    }
+  });
 
   const [open, setOpen] = useState(false);
   const handleClickOpen = () => {
@@ -74,8 +83,7 @@ export default function PurchaseOrders() {
 
   const handleCreate = async (data: any) => {
     try {
-      console.log({ data })
-      await trigger(data /* options */);
+      mutation.mutate(data);
       handleClose();
     } catch (e) {
       // error handling
