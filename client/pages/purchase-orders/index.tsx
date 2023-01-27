@@ -2,7 +2,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import axios from "axios";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, get, Controller } from "react-hook-form";
 
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -11,16 +11,30 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { Autocomplete, Grid, Stack } from "@mui/material";
-
+import * as Yup from "yup";
+import { yupResolver } from '@hookform/resolvers/yup'
+import { ErrorMessage } from '@hookform/error-message';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 async function createPurchaseOrder(url: string, { arg }: any) {
   const { data } = await axios.post(url, arg);
   return data;
 }
 
+const validationSchema = Yup.object({
+  description: Yup.string(),
+  issueDate: Yup.string().required(),
+  expirationDate: Yup.string().required(),
+  lines: Yup.array().min(1).of(
+    Yup.object({
+      productId: Yup.number().min(1).required(),
+      price: Yup.number().min(1, 'El minimo es 1').required('El precio es requerido'),
+      quantity: Yup.number().min(1).required(),
+    })
+  ) 
+})
+
 export default function PurchaseOrders() {
   const { data, isLoading } = useSWR("/api/purchase-orders", fetcher);
-  console.log({ data })
   const {
     register,
     handleSubmit,
@@ -28,6 +42,8 @@ export default function PurchaseOrders() {
     formState: { errors },
     setValue
   } = useForm({
+    mode: 'onBlur',
+    resolver: yupResolver(validationSchema),
     defaultValues: {
       description: '',
       "expirationDate": "2023-01-25T16:23:17.912Z",
@@ -35,6 +51,7 @@ export default function PurchaseOrders() {
       lines: [{ "productId": '', "price": '', "quantity": '' }]
     },
   });
+  console.log({ data, get: get(errors, 'description'), errors })
 
   const fieldArray = useFieldArray({
     control: control,
@@ -86,6 +103,7 @@ export default function PurchaseOrders() {
               fullWidth
               variant="standard"
               {...register("description")}
+              helperText={<ErrorMessage errors={errors} name="description" />}
             />
             {fieldArray.fields.map((field, index) => (
               <Stack>
@@ -96,7 +114,6 @@ export default function PurchaseOrders() {
                   getOptionLabel={(option: any) => option.label}
                   sx={{ width: 300 }}
                   onChange={(_, selected) => {
-                    console.log({ selected })
                     setValue(`lines.${index}.productId`, selected.id)
                   }}
                   renderInput={(params) => <TextField {...params} label="Product" />}
@@ -108,9 +125,8 @@ export default function PurchaseOrders() {
                   type="number"
                   fullWidth
                   variant="standard"
-                  {...register(`lines.${index}.price`, {
-                    valueAsNumber: true
-                  })}
+                  {...register(`lines.${index}.price`)}
+                  helperText={<ErrorMessage errors={errors} name={`lines.${index}.price`} />}
                 />
                 <TextField
                   margin="dense"
@@ -119,9 +135,7 @@ export default function PurchaseOrders() {
                   type="number"
                   fullWidth
                   variant="standard"
-                  {...register(`lines.${index}.quantity`, {
-                    valueAsNumber: true
-                  })}
+                  {...register(`lines.${index}.quantity`)}
                 />
                 <Button
                   onClick={() => fieldArray.remove(index)}  
