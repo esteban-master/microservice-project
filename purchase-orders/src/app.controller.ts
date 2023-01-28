@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { PurchaseOrderService } from './services/purchase-order.service';
 import { CreatePurchaseOrderDto } from './dto/createPurchaseOrderDto';
 import { Ctx, EventPattern, Payload } from '@nestjs/microservices';
@@ -20,6 +20,11 @@ export class AppController {
       purchaseOrders,
       products,
     };
+  }
+
+  @Get('/:id')
+  async get(@Param('id') id: string) {
+    return await this.purchaseOrderService.findUnique({ id: Number(id) });
   }
 
   @Post()

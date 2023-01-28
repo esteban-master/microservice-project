@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePurchaseOrderDto } from '../dto/createPurchaseOrderDto';
 import { PrismaService } from '../prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PurchaseOrderService {
@@ -13,6 +14,7 @@ export class PurchaseOrderService {
           select: {
             productLine: {
               select: {
+                id: true,
                 line: {},
                 product: {
                   select: {
@@ -55,7 +57,40 @@ export class PurchaseOrderService {
           })),
         },
       },
+      include: {
+        purchaseOrderLines: {
+          include: {
+            productLine: {
+              include: {
+                line: {},
+                product: {},
+              },
+            },
+          },
+        },
+      },
     });
     return newPurchaseOrder;
+  }
+
+  async findUnique(
+    purchaseOrderWhereUniqueInput: Prisma.PurchaseOrderWhereUniqueInput,
+  ) {
+    const find = await this.prisma.purchaseOrder.findUnique({
+      where: purchaseOrderWhereUniqueInput,
+      include: {
+        purchaseOrderLines: {
+          include: {
+            productLine: {
+              include: { line: {}, product: {} },
+            },
+          },
+        },
+      },
+    });
+    if (find) {
+      return find;
+    }
+    throw new NotFoundException('Purchase order not found');
   }
 }

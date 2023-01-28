@@ -40,24 +40,4 @@ COPY --chown=node:node package*.json ./
 COPY --chown=node:node --from=build /app/prisma ./prisma
 COPY --chown=node:node --from=build /app/dist ./dist
 
-# CMD [ "node", "dist/main.js" ]
 CMD ["npm", "run", "start:migrate:prod"]
-# COPY package*.json ./
-# COPY prisma ./prisma/
-
-# RUN npm install
-
-# COPY . .
-
-# RUN npm run build 
-
-
-# FROM node:18.12.1-alpine
-
-# COPY --from=builder /app/node_modules ./node_modules
-# COPY --from=builder /app/package*.json ./
-# COPY --from=builder /app/dist ./dist
-# COPY --from=builder /app/prisma ./prisma
-# EXPOSE 3000
-
-# CMD ["npm", "run", "start:migrate:prod"]
