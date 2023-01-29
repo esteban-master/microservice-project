@@ -30,7 +30,7 @@ model Product {
 model ProductLine {
   id        Int     @id @default(autoincrement())
   createdAt          DateTime            @default(now())
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
   line Line @relation(fields: [lineId], references: [id])
   lineId Int @unique
@@ -48,9 +48,9 @@ model Line {
 model PurchaseOrderLine {
   id              Int           @id @default(autoincrement())
   createdAt          DateTime            @default(now())
-  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
   purchaseOrderId Int
 
-  productLine   ProductLine @relation(fields: [productLineId], references: [id])
+  productLine   ProductLine @relation(fields: [productLineId], references: [id], onDelete: Cascade)
   productLineId Int         @unique
 }

@@ -198,7 +198,7 @@ const PurchaseOrderForm = NiceModal.create(({ id, products } : { id?: number, pr
             </Button>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleClose}>Cancelar</Button>
             <Button type="submit">
               {id ? 'Editar' : 'Crear'}
             </Button>

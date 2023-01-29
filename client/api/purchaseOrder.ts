@@ -6,8 +6,20 @@ type PurchaseOrderResponse = {
   purchaseOrders: PurchaseOrder[],
   products: Product[]
 }
-
 type PurchaseOrderResponseTransform = Pick<PurchaseOrderResponse, 'purchaseOrders'> & { products: { [key: string]: Product } }
+type LineForm = Pick<Line, 'price' | 'quantity'> & { productId: number }
+export type PurchaseOrderForm = Pick<PurchaseOrder, 'description' | 'expirationDate' | 'issueDate'> & { lines: LineForm[]}
+
+const transformDataPurchaseOrder = (data: PurchaseOrder) => {
+  return {
+    ...data,
+    lines: data.purchaseOrderLines.map(item => ({
+      productId: item.productLine.product.id,
+      price: item.productLine.line.price,
+      quantity: item.productLine.line.quantity 
+    }))};
+}
+
 export const useGetAllPurchaseOrders = () => {
   const queryClient = useQueryClient()
   const query = useQuery<PurchaseOrderResponseTransform>({
@@ -24,22 +36,21 @@ export const useGetAllPurchaseOrders = () => {
       };
     },
     onSuccess(data) {
-      data.purchaseOrders.forEach(item => queryClient.setQueryData(['purchase-orders', item.id], data))
+      data.purchaseOrders.forEach(item => queryClient.setQueryData<PurchaseOrderForm>(['purchase-orders', item.id],  transformDataPurchaseOrder(item)))
     },
   })
 
   return query;
 }
-type LineForm = Pick<Line, 'price' | 'quantity'> & { productId: number }
-export type PurchaseOrderForm = Pick<PurchaseOrder, 'description' | 'expirationDate' | 'issueDate'> & { lines: LineForm[]}
+
 export const useGetPurchaseOrder = () => {
   const queryClient = useQueryClient()
   return async (id: number): Promise<PurchaseOrderForm> => {
     return await queryClient.fetchQuery<PurchaseOrderForm>({
-      queryKey: [],
+      queryKey: ['purchase-orders', id],
       queryFn: async () => {
         const { data } = await axios.get<PurchaseOrder>(`/api/purchase-orders/${id}`);
-        return { ...data, lines: data.purchaseOrderLines.map(item => ({ productId: item.productLine.product.id, price: item.productLine.line.price, quantity: item.productLine.line.quantity }))};
+        return transformDataPurchaseOrder(data)
       }
     })
   }
@@ -75,8 +86,7 @@ export const useUpdatePurchaseOrder = () => {
       const { data } = await axios.put(`/api/purchase-orders/${id}`, purchaseOrder)
       return data;
     },
-    onSuccess(data, variables, context) {
-      console.log({ data, variables, context })
+    onSuccess(data) {
       queryClient.setQueryData<PurchaseOrderResponseTransform>(['purchase-orders'], (old) => {
         if (old) {
           const index = old.purchaseOrders.findIndex(item => item.id === data.id)
