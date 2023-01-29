@@ -44,7 +44,6 @@ export class ProductsService {
           },
         },
       });
-      console.log("HOLA")
       this.natsClient.emit('product.update', productUpdate);
       return productUpdate;
     } catch (error) {

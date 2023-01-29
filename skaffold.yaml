@@ -10,6 +10,7 @@ build:
       context: purchase-orders
       docker:
         dockerfile: Dockerfile
+        target: development
       sync:
         manual:
           - src: 'purchase-orders/scr/**/*.ts'
@@ -18,6 +19,7 @@ build:
       context: mantainer
       docker:
         dockerfile: Dockerfile
+        target: development
       sync:
         manual:
           - src: 'mantainer/scr/**/*.ts'
@@ -26,7 +28,20 @@ build:
       context: client
       docker:
         dockerfile: Dockerfile
+        target: development
       sync:
         manual:
           - src: 'client/**/*.*'
             dest: .
+profiles:
+  - name: prod
+    patches:
+      - op: replace
+        path: /build/artifacts/0/docker/target
+        value: production
+      - op: replace
+        path: /build/artifacts/1/docker/target
+        value: production
+      - op: replace
+        path: /build/artifacts/2/docker/target
+        value: production
