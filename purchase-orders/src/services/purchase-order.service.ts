@@ -7,6 +7,7 @@ import { CreatePurchaseOrderDto } from '../dto/createPurchaseOrderDto';
 import { PrismaService } from '../prisma.service';
 import { Prisma } from '@prisma/client';
 import { EditPurchaseOrderDto } from 'src/dto/editPurchaseOrderDto';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class PurchaseOrderService {
@@ -53,7 +54,7 @@ export class PurchaseOrderService {
           create: lines.map((item) => ({
             line: {
               create: {
-                id: 'sdf',
+                id: `purchase-orders-${uuidv4()}`,
                 price: item.price,
                 quantity: item.quantity,
                 product: {
@@ -97,7 +98,7 @@ export class PurchaseOrderService {
               create: {
                 line: {
                   create: {
-                    id: '32',
+                    id: `purchase-orders-${uuidv4()}`,
                     price: item.price,
                     quantity: item.quantity,
                     product: {
@@ -141,7 +142,7 @@ export class PurchaseOrderService {
       const deleteLines = this.prisma.line.deleteMany({
         where: {
           id: {
-            in: [''],
+            in: editPurchaseOrderDto.deleteLinesIds,
           },
         },
       });

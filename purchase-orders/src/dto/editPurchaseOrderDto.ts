@@ -6,5 +6,5 @@ export class EditPurchaseOrderDto extends PartialType(CreatePurchaseOrderDto) {
   @IsNotEmpty()
   @ArrayMinSize(0)
   @IsArray()
-  deleteLinesIds: number[];
+  deleteLinesIds: string[];
 }
