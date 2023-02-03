@@ -36,18 +36,6 @@ export class PurchaseOrderService {
                 product: {},
               },
             },
-            // productLine: {
-            //   select: {
-            //     id: true,
-            //     line: {},
-            //     product: {
-            //       select: {
-            //         name: true,
-            //         id: true,
-            //       },
-            //     },
-            //   },
-            // },
           },
         },
       },
@@ -65,6 +53,7 @@ export class PurchaseOrderService {
           create: lines.map((item) => ({
             line: {
               create: {
+                id: 'sdf',
                 price: item.price,
                 quantity: item.quantity,
                 product: {
@@ -108,6 +97,7 @@ export class PurchaseOrderService {
               create: {
                 line: {
                   create: {
+                    id: '32',
                     price: item.price,
                     quantity: item.quantity,
                     product: {
@@ -151,7 +141,7 @@ export class PurchaseOrderService {
       const deleteLines = this.prisma.line.deleteMany({
         where: {
           id: {
-            in: editPurchaseOrderDto.deleteLinesIds,
+            in: [''],
           },
         },
       });

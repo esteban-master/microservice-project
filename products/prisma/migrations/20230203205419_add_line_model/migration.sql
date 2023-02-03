@@ -1,0 +1,13 @@
+-- CreateTable
+CREATE TABLE "Line" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "price" DOUBLE PRECISION NOT NULL,
+    "quantity" DOUBLE PRECISION NOT NULL,
+    "productId" INTEGER NOT NULL,
+
+    CONSTRAINT "Line_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "Line" ADD CONSTRAINT "Line_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;

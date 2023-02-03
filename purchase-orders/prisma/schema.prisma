@@ -24,11 +24,11 @@ model Product {
   id          Int           @id
   name        String
   version     Int
-  productLine Line[]
+  lines       Line[]
 }
 
 model Line {
-  id Int @id @default(autoincrement())
+  id String @id
   createdAt          DateTime            @default(now())
   price Float
   quantity Float
@@ -45,5 +45,5 @@ model PurchaseOrderLine {
   purchaseOrderId Int
 
   line Line @relation(fields: [lineId], references: [id], onDelete: Cascade)
-  lineId Int @unique
+  lineId String @unique
 }
