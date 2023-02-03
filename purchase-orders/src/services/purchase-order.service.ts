@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePurchaseOrderDto } from '../dto/createPurchaseOrderDto';
 import { PrismaService } from '../prisma.service';
 import { Prisma } from '@prisma/client';
@@ -11,13 +15,13 @@ export class PurchaseOrderService {
   async test() {
     const purchaseOrder = await this.prisma.purchaseOrder.findMany();
     const purchaseOrderLine = await this.prisma.purchaseOrderLine.findMany();
-    const prodcutLine = await this.prisma.productLine.findMany();
     const line = await this.prisma.line.findMany();
+    const prdoucts = await this.prisma.product.findMany();
     return {
       purchaseOrder,
       purchaseOrderLine,
-      prodcutLine,
       line,
+      prdoucts,
     };
   }
 
@@ -26,18 +30,24 @@ export class PurchaseOrderService {
       include: {
         purchaseOrderLines: {
           select: {
-            productLine: {
-              select: {
-                id: true,
-                line: {},
-                product: {
-                  select: {
-                    name: true,
-                    id: true,
-                  },
-                },
+            id: true,
+            line: {
+              include: {
+                product: {},
               },
             },
+            // productLine: {
+            //   select: {
+            //     id: true,
+            //     line: {},
+            //     product: {
+            //       select: {
+            //         name: true,
+            //         id: true,
+            //       },
+            //     },
+            //   },
+            // },
           },
         },
       },
@@ -53,17 +63,13 @@ export class PurchaseOrderService {
         issueDate: createPurchaseOrder.issueDate,
         purchaseOrderLines: {
           create: lines.map((item) => ({
-            productLine: {
+            line: {
               create: {
+                price: item.price,
+                quantity: item.quantity,
                 product: {
                   connect: {
                     id: item.productId,
-                  },
-                },
-                line: {
-                  create: {
-                    price: item.price,
-                    quantity: item.quantity,
                   },
                 },
               },
@@ -74,9 +80,8 @@ export class PurchaseOrderService {
       include: {
         purchaseOrderLines: {
           include: {
-            productLine: {
+            line: {
               include: {
-                line: {},
                 product: {},
               },
             },
@@ -92,19 +97,74 @@ export class PurchaseOrderService {
     purchaseOrderWhereUniqueInput: Prisma.PurchaseOrderWhereUniqueInput,
   ) {
     try {
-      return await this.prisma.purchaseOrder.update({
+      const updatePurchaseOrder = this.prisma.purchaseOrder.update({
         where: purchaseOrderWhereUniqueInput,
         data: {
           description: editPurchaseOrderDto.description,
           issueDate: editPurchaseOrderDto.issueDate,
           expirationDate: editPurchaseOrderDto.expirationDate,
           purchaseOrderLines: {
-            // delete: {
-            // }
+            upsert: editPurchaseOrderDto.lines.map((item) => ({
+              create: {
+                line: {
+                  create: {
+                    price: item.price,
+                    quantity: item.quantity,
+                    product: {
+                      connect: {
+                        id: item.productId,
+                      },
+                    },
+                  },
+                },
+              },
+              where: { id: item.purchaseOrderLineId },
+              update: {
+                line: {
+                  update: {
+                    price: item.price,
+                    quantity: item.quantity,
+                    product: {
+                      connect: {
+                        id: item.productId,
+                      },
+                    },
+                  },
+                },
+              },
+            })),
+          },
+        },
+        include: {
+          purchaseOrderLines: {
+            include: {
+              line: {
+                include: {
+                  product: {},
+                },
+              },
+            },
           },
         },
       });
-    } catch (error) {}
+
+      const deleteLines = this.prisma.line.deleteMany({
+        where: {
+          id: {
+            in: editPurchaseOrderDto.deleteLinesIds,
+          },
+        },
+      });
+      const [purchaseOrderUpdated] = await this.prisma.$transaction([
+        updatePurchaseOrder,
+        deleteLines,
+      ]);
+
+      return purchaseOrderUpdated;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
   }
 
   async findUnique(
@@ -115,8 +175,10 @@ export class PurchaseOrderService {
       include: {
         purchaseOrderLines: {
           include: {
-            productLine: {
-              include: { line: {}, product: {} },
+            line: {
+              include: {
+                product: {},
+              },
             },
           },
         },

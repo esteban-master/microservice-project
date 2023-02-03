@@ -3,14 +3,14 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
 import { Prisma, Product } from '@prisma/client';
-import { CreateProductDto } from '../dto/createProductDto';
 import { NatsJetStreamClient } from '@nestjs-plugins/nestjs-nats-jetstream-transport';
 import { EditProductDto } from 'src/dto/editProductDto';
+import { PrismaService } from './prisma.service';
+import { CreateProductDto } from './dto/createProductDto';
 
 @Injectable()
-export class ProductsService {
+export class ProductService {
   constructor(
     private prisma: PrismaService,
     private natsClient: NatsJetStreamClient,
@@ -49,6 +49,12 @@ export class ProductsService {
     } catch (error) {
       throw new InternalServerErrorException('Error update product');
     }
+  }
+
+  async delete(productWhereUniqueInput: Prisma.ProductWhereUniqueInput) {
+    return await this.prisma.product.delete({
+      where: productWhereUniqueInput,
+    });
   }
 
   async findUnique(productWhereUniqueInput: Prisma.ProductWhereUniqueInput) {

@@ -13,7 +13,7 @@ import { ProductService } from './services/product.service';
       isGlobal: true,
       validationSchema: Joi.object({
         DATABASE_URL: Joi.string().required(),
-        NATS_URL: Joi.string().required()
+        NATS_URL: Joi.string().required(),
       }),
     }),
   ],

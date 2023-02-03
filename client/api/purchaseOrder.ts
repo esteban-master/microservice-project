@@ -7,16 +7,18 @@ type PurchaseOrderResponse = {
   products: Product[]
 }
 type PurchaseOrderResponseTransform = Pick<PurchaseOrderResponse, 'purchaseOrders'> & { products: { [key: string]: Product } }
-type LineForm = Pick<Line, 'price' | 'quantity'> & { productId: number }
-export type PurchaseOrderForm = Pick<PurchaseOrder, 'description' | 'expirationDate' | 'issueDate'> & { lines: LineForm[]}
+type LineForm = Pick<Line, 'price' | 'quantity' | 'id'> & { productId: number }
+export type PurchaseOrderForm = Pick<PurchaseOrder, 'description' | 'expirationDate' | 'issueDate'> & { lines: LineForm[], deleteLinesIds: number[] }
 
-const transformDataPurchaseOrder = (data: PurchaseOrder) => {
+const transformDataPurchaseOrder = (data: PurchaseOrder): PurchaseOrderForm => {
   return {
     ...data,
+    deleteLinesIds: [],
     lines: data.purchaseOrderLines.map(item => ({
-      productId: item.productLine.product.id,
-      price: item.productLine.line.price,
-      quantity: item.productLine.line.quantity 
+      id: item.line.id,
+      productId: item.line.product.id,
+      price: item.line.price,
+      quantity: item.line.quantity 
     }))};
 }
 
@@ -100,7 +102,7 @@ export const useUpdatePurchaseOrder = () => {
           purchaseOrders: []
         }
       })
-      queryClient.setQueryData<PurchaseOrder>(['purchase-orders', data.id], data)
+      queryClient.setQueryData<PurchaseOrderForm>(['purchase-orders', data.id], transformDataPurchaseOrder(data))
     },
   });
 } 

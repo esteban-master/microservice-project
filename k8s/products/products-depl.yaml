@@ -1,35 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mantainer-depl
+  name: products-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mantainer
+      app: products
   template: 
     metadata:
       labels:
-        app: mantainer
+        app: products
     spec:
       containers:
-      - name: mantainer
-        image: nestjs/mantainer
+      - name: products
+        image: nestjs/products
         ports: 
         - containerPort: 3000
         envFrom:
           - configMapRef:
-              name: mantainer-config-map 
+              name: products-config-map
 ---
 apiVersion: v1
 kind: Service
 metadata: 
-  name: mantainer-srv
+  name: products-srv
 spec: 
   selector: 
-    app: mantainer
+    app: products
   ports:
-  - name: mantainer
+  - name: products
     protocol: TCP
     port: 3000
     targetPort: 3000

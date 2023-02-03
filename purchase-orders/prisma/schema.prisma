@@ -24,17 +24,7 @@ model Product {
   id          Int           @id
   name        String
   version     Int
-  productLine ProductLine[]
-}
-
-model ProductLine {
-  id        Int     @id @default(autoincrement())
-  createdAt          DateTime            @default(now())
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId Int
-  line Line @relation(fields: [lineId], references: [id])
-  lineId Int @unique
-  purchaseOrderLine PurchaseOrderLine?
+  productLine Line[]
 }
 
 model Line {
@@ -42,7 +32,10 @@ model Line {
   createdAt          DateTime            @default(now())
   price Float
   quantity Float
-  productLine ProductLine?
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+
+  purchaseOrderLine PurchaseOrderLine?
 }
 
 model PurchaseOrderLine {
@@ -51,6 +44,6 @@ model PurchaseOrderLine {
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
   purchaseOrderId Int
 
-  productLine   ProductLine @relation(fields: [productLineId], references: [id], onDelete: Cascade)
-  productLineId Int         @unique
+  line Line @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  lineId Int @unique
 }

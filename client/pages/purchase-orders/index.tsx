@@ -25,8 +25,8 @@ export default function PurchaseOrders() {
                 {item.description} - {item.purchaseOrderLines.length} lines
 
                 <ul>
-                  {item.purchaseOrderLines.map((line: any) => <li key={line.productLine.line.id}>
-                    <p>{`${line.productLine.product.name} - (Quantity: ${line.productLine.line.quantity} Price: ${line.productLine.line.price})`}</p>
+                  {item.purchaseOrderLines.map((item) => <li key={item.line.id}>
+                    <p>{`${item.line.product.name} - (Quantity: ${item.line.quantity} Price: ${item.line.price})`}</p>
                   </li>)}
                 </ul>
                 <Button

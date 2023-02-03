@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mantainer-postgres-depl
+  name: products-postgres-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mantainer-postgres
+      app: products-postgres
   template:
     metadata:
       labels:
-        app: mantainer-postgres
+        app: products-postgres
     spec:
       containers:
-        - name: mantainer-postgres
+        - name: products-postgres
           image: postgres
           env:
             - name: POSTGRES_USER
@@ -21,15 +21,15 @@ spec:
             - name: POSTGRES_PASSWORD
               value: misecreto
             - name: POSTGRES_DB
-              value: mantainer
+              value: products
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mantainer-postgres-srv
+  name: products-postgres-srv
 spec:
   selector:
-    app: mantainer-postgres
+    app: products-postgres
   ports:
     - name: db
       protocol: TCP

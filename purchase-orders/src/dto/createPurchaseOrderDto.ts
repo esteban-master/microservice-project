@@ -15,6 +15,8 @@ class LineDto {
   @IsNumber()
   readonly productId: number;
 
+  readonly purchaseOrderLineId?: number;
+
   @IsNotEmpty()
   @IsNumber()
   @IsPositive()

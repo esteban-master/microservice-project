@@ -1,9 +1,9 @@
+import { Line } from "./Line";
 import { Product } from "./Product"
-import { ProductLine } from "./ProductLine"
 
 type PurchaseOrderLine = {
-  productLine: ProductLine,
-  product: Product
+  id: number;
+  line: Line
 }
 
 export type PurchaseOrder = {

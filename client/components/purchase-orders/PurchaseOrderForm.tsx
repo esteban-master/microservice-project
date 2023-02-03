@@ -35,7 +35,8 @@ const PurchaseOrderForm = NiceModal.create(({ id, products } : { id?: number, pr
     handleSubmit,
     control,
     setValue,
-    formState: { errors }
+    formState: { errors },
+    getValues
   } = useForm<PurchaseOrderForm>({
     mode: 'onBlur',
     resolver: yupResolver(validationSchema),
@@ -47,7 +48,8 @@ const PurchaseOrderForm = NiceModal.create(({ id, products } : { id?: number, pr
         description: '',
         expirationDate: new Date().toISOString(),
         issueDate: new Date().toISOString(),
-        lines: [{ productId: 0, price: 0, quantity: 0 }]
+        lines: [{ productId: 0, price: 0, quantity: 0, id: 0 }],
+        deleteLinesIds: []
       }))
     },
   });
@@ -181,7 +183,10 @@ const PurchaseOrderForm = NiceModal.create(({ id, products } : { id?: number, pr
                   helperText={<ErrorMessage errors={errors} name={`lines.${index}.quantity`} />}
                 />
                 <Button
-                  onClick={() => fieldArray.remove(index)}  
+                  onClick={() => {
+                    setValue('deleteLinesIds', getValues('deleteLinesIds').concat(field.id))
+                    fieldArray.remove(index)
+                  }}  
                 >
                   Remove linea
                 </Button>
@@ -192,6 +197,7 @@ const PurchaseOrderForm = NiceModal.create(({ id, products } : { id?: number, pr
                 quantity: 0,
                 price: 0,
                 productId: 0,
+                id: 0
               })}  
             >
               Otra linea
