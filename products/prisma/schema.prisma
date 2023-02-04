@@ -21,7 +21,7 @@ model Product {
 }
 model Line {
   id String @id
-  createdAt          DateTime            @default(now())
+  createdAt          DateTime
   price Float
   quantity Float
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)

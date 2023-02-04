@@ -8,12 +8,18 @@ import {
   Put,
 } from '@nestjs/common';
 import { EditProductDto } from 'src/dto/editProductDto';
-import { ProductService } from './product.service';
+import { ProductService } from './services/product.service';
 import { CreateProductDto } from './dto/createProductDto';
-
+import { Ctx, EventPattern, Payload } from '@nestjs/microservices';
+import { NatsJetStreamContext } from '@nestjs-plugins/nestjs-nats-jetstream-transport';
+import { LineService } from './services/line.service';
+import { Line } from '@prisma/client';
 @Controller('/api/products')
 export class AppController {
-  constructor(private readonly productsService: ProductService) {}
+  constructor(
+    private readonly productsService: ProductService,
+    private readonly lineService: LineService,
+  ) {}
 
   @Get()
   all() {
@@ -23,6 +29,11 @@ export class AppController {
   @Get('/:id')
   getProduct(@Param('id') id: string) {
     return this.productsService.findUnique({ id: Number(id) });
+  }
+
+  @Get('/:id/lines')
+  allLines(@Param('id') productId: string) {
+    return this.lineService.allByProductId({ productId: Number(productId) });
   }
 
   @Post()
@@ -38,5 +49,13 @@ export class AppController {
   @Delete('/:id')
   delete(@Param('id') productId: string) {
     return this.productsService.delete({ id: Number(productId) });
+  }
+
+  @EventPattern('line.create')
+  public async updateProductEvent(
+    @Payload() data: Line[],
+    @Ctx() context: NatsJetStreamContext,
+  ) {
+    this.lineService.create(data, context);
   }
 }

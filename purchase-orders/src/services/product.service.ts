@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Product } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class ProductService {
     return await this.prisma.product.findMany({});
   }
 
-  async create(data: any, context: NatsJetStreamContext) {
+  async create(data: Product, context: NatsJetStreamContext) {
     await this.prisma.product.create({
       data: {
         name: data.name,
@@ -26,7 +26,7 @@ export class ProductService {
     context.message.ack();
   }
 
-  async edit(data: any, context: NatsJetStreamContext) {
+  async edit(data: Product, context: NatsJetStreamContext) {
     try {
       const product = await this.prisma.product.findFirst({
         where: { id: data.id, version: data.version - 1 },

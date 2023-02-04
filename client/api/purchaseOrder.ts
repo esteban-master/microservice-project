@@ -8,7 +8,7 @@ type PurchaseOrderResponse = {
 }
 type PurchaseOrderResponseTransform = Pick<PurchaseOrderResponse, 'purchaseOrders'> & { products: { [key: string]: Product } }
 type LineForm = Pick<Line, 'price' | 'quantity' | 'id'> & { productId: number }
-export type PurchaseOrderForm = Pick<PurchaseOrder, 'description' | 'expirationDate' | 'issueDate'> & { lines: LineForm[], deleteLinesIds: number[] }
+export type PurchaseOrderForm = Pick<PurchaseOrder, 'description' | 'expirationDate' | 'issueDate'> & { lines: LineForm[], deleteLinesIds: string[] }
 
 const transformDataPurchaseOrder = (data: PurchaseOrder): PurchaseOrderForm => {
   return {

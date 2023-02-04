@@ -13,7 +13,7 @@ async function bootstrap() {
     strategy: new NatsJetStreamServer({
       connectionOptions: {
         servers: [configService.get('NATS_URL')],
-        name: 'purchase-order-listener'
+        name: 'purchase-order-listener',
       },
       consumerOptions: {
         deliverGroup: 'purchase-orders-group',
@@ -24,11 +24,11 @@ async function bootstrap() {
       },
       streamConfig: {
         name: 'mantainer_stream',
-        subjects: ['product.*']
-      }
-    })
-  }
-  const microservice = app.connectMicroservice(options)
+        subjects: ['product.*'],
+      },
+    }),
+  };
+  const microservice = app.connectMicroservice(options);
   microservice.listen();
   await app.listen(3000);
 }

@@ -8,10 +8,14 @@ import { PrismaService } from '../prisma.service';
 import { Prisma } from '@prisma/client';
 import { EditPurchaseOrderDto } from 'src/dto/editPurchaseOrderDto';
 import { v4 as uuidv4 } from 'uuid';
+import { NatsJetStreamClient } from '@nestjs-plugins/nestjs-nats-jetstream-transport';
 
 @Injectable()
 export class PurchaseOrderService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private natsClient: NatsJetStreamClient,
+  ) {}
 
   async test() {
     const purchaseOrder = await this.prisma.purchaseOrder.findMany();
@@ -45,7 +49,7 @@ export class PurchaseOrderService {
 
   async create(createPurchaseOrder: CreatePurchaseOrderDto) {
     const lines = createPurchaseOrder.lines;
-    const newPurchaseOrder = this.prisma.purchaseOrder.create({
+    const newPurchaseOrder = await this.prisma.purchaseOrder.create({
       data: {
         description: createPurchaseOrder.description,
         expirationDate: createPurchaseOrder.expirationDate,
@@ -79,6 +83,14 @@ export class PurchaseOrderService {
         },
       },
     });
+    const newLines = newPurchaseOrder.purchaseOrderLines.map((item) => ({
+      id: item.line.id,
+      price: item.line.price,
+      quantity: item.line.quantity,
+      createdAt: item.line.createdAt,
+      productId: item.line.productId,
+    }));
+    this.natsClient.emit('line.create', newLines);
     return newPurchaseOrder;
   }
 
@@ -153,7 +165,6 @@ export class PurchaseOrderService {
 
       return purchaseOrderUpdated;
     } catch (error) {
-      console.log(error);
       throw new InternalServerErrorException();
     }
   }

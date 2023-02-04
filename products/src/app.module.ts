@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { ProductService } from './product.service';
+import { ProductService } from './services/product.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import {
@@ -8,6 +8,7 @@ import {
   NatsJetStreamTransport,
 } from '@nestjs-plugins/nestjs-nats-jetstream-transport';
 import { PrismaService } from './prisma.service';
+import { LineService } from './services/line.service';
 
 @Module({
   imports: [
@@ -27,6 +28,6 @@ import { PrismaService } from './prisma.service';
     }),
   ],
   controllers: [AppController],
-  providers: [ProductService, PrismaService, NatsJetStreamClient],
+  providers: [ProductService, LineService, PrismaService, NatsJetStreamClient],
 })
 export class AppModule {}

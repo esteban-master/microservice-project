@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -6,8 +7,8 @@ import {
 import { Prisma, Product } from '@prisma/client';
 import { NatsJetStreamClient } from '@nestjs-plugins/nestjs-nats-jetstream-transport';
 import { EditProductDto } from 'src/dto/editProductDto';
-import { PrismaService } from './prisma.service';
-import { CreateProductDto } from './dto/createProductDto';
+import { PrismaService } from '../prisma.service';
+import { CreateProductDto } from '../dto/createProductDto';
 
 @Injectable()
 export class ProductService {
@@ -52,6 +53,16 @@ export class ProductService {
   }
 
   async delete(productWhereUniqueInput: Prisma.ProductWhereUniqueInput) {
+    const count = await this.prisma.line.count({
+      where: { productId: productWhereUniqueInput.id },
+    });
+
+    if (count > 0) {
+      throw new BadRequestException(
+        'Este producto tiene asociado movimientos de inventario',
+      );
+    }
+
     return await this.prisma.product.delete({
       where: productWhereUniqueInput,
     });

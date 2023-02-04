@@ -48,7 +48,7 @@ const PurchaseOrderForm = NiceModal.create(({ id, products } : { id?: number, pr
         description: '',
         expirationDate: new Date().toISOString(),
         issueDate: new Date().toISOString(),
-        lines: [{ productId: 0, price: 0, quantity: 0, id: 0 }],
+        lines: [{ productId: 0, price: 0, quantity: 0, id: '' }],
         deleteLinesIds: []
       }))
     },
@@ -197,7 +197,7 @@ const PurchaseOrderForm = NiceModal.create(({ id, products } : { id?: number, pr
                 quantity: 0,
                 price: 0,
                 productId: 0,
-                id: 0
+                id: ''
               })}  
             >
               Otra linea
