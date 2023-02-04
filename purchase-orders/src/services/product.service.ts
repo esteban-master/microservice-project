@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Product } from '@prisma/client';
+import { Prisma, Product } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -49,5 +49,13 @@ export class ProductService {
     } catch (error) {
       throw new InternalServerErrorException();
     }
+  }
+
+  async delete(
+    productDeleteArgs: Prisma.ProductDeleteArgs,
+    context: NatsJetStreamContext,
+  ) {
+    await this.prisma.product.delete(productDeleteArgs);
+    context.message.ack();
   }
 }

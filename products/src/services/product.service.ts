@@ -63,9 +63,13 @@ export class ProductService {
       );
     }
 
-    return await this.prisma.product.delete({
+    const productDelete = await this.prisma.product.delete({
       where: productWhereUniqueInput,
     });
+
+    this.natsClient.emit('product.delete', productDelete.id);
+
+    return productDelete;
   }
 
   async findUnique(productWhereUniqueInput: Prisma.ProductWhereUniqueInput) {

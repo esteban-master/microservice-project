@@ -62,4 +62,17 @@ export class AppController {
   ) {
     this.productService.edit(data, context);
   }
+
+  @EventPattern('product.delete')
+  public async deleteProductEvent(
+    @Payload() id: string,
+    @Ctx() context: NatsJetStreamContext,
+  ) {
+    this.productService.delete(
+      {
+        where: { id: Number(id) },
+      },
+      context,
+    );
+  }
 }
