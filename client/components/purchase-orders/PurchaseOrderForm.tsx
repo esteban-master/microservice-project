@@ -54,6 +54,8 @@ const PurchaseOrderForm = NiceModal.create(({ id, products } : { id?: number, pr
     },
   });
 
+  console.log(getValues())
+
   const issueDate = useWatch({
     control,
     name: "issueDate",

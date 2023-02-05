@@ -26,13 +26,18 @@ export class AppController {
     return this.productsService.all();
   }
 
+  @Get('/lines/all')
+  allLines() {
+    return this.lineService.all();
+  }
+
   @Get('/:id')
   getProduct(@Param('id') id: string) {
     return this.productsService.findUnique({ id: Number(id) });
   }
 
   @Get('/:id/lines')
-  allLines(@Param('id') productId: string) {
+  allLinesByProductId(@Param('id') productId: string) {
     return this.lineService.allByProductId({ productId: Number(productId) });
   }
 
@@ -52,10 +57,26 @@ export class AppController {
   }
 
   @EventPattern('line.create')
-  public async updateProductEvent(
+  public async createLineEvent(
     @Payload() data: Line[],
     @Ctx() context: NatsJetStreamContext,
   ) {
     this.lineService.create(data, context);
+  }
+
+  @EventPattern('line.update')
+  public async updateLineEvent(
+    @Payload() data: Line[],
+    @Ctx() context: NatsJetStreamContext,
+  ) {
+    this.lineService.update(data, context);
+  }
+
+  @EventPattern('line.delete')
+  public async deleteLineEvent(
+    @Payload() data: string[],
+    @Ctx() context: NatsJetStreamContext,
+  ) {
+    this.lineService.delete(data, context);
   }
 }

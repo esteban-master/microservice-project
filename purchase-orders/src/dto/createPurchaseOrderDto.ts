@@ -9,8 +9,9 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-
 class LineDto {
+  readonly id: string;
+
   @IsNotEmpty()
   @IsNumber()
   readonly productId: number;

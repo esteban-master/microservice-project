@@ -99,6 +99,7 @@ export class PurchaseOrderService {
     purchaseOrderWhereUniqueInput: Prisma.PurchaseOrderWhereUniqueInput,
   ) {
     try {
+      console.log('EDIT PURCHASE', editPurchaseOrderDto);
       const updatePurchaseOrder = this.prisma.purchaseOrder.update({
         where: purchaseOrderWhereUniqueInput,
         data: {
@@ -162,6 +163,47 @@ export class PurchaseOrderService {
         updatePurchaseOrder,
         deleteLines,
       ]);
+
+      const lines = purchaseOrderUpdated.purchaseOrderLines.filter(
+        (item) => !editPurchaseOrderDto.deleteLinesIds.includes(item.lineId),
+      );
+
+      const ids = editPurchaseOrderDto.lines.map((item) => item.id);
+
+      const linesIdsUpdated = lines
+        .filter((item) => ids.includes(item.lineId))
+        .map((item) => ({
+          id: item.lineId,
+          price: item.line.price,
+          quantity: item.line.quantity,
+          createdAt: item.line.createdAt,
+          productId: item.line.productId,
+        }));
+
+      const createdLines = lines
+        .filter((item) => !ids.includes(item.lineId))
+        .map((item) => ({
+          id: item.lineId,
+          price: item.line.price,
+          quantity: item.line.quantity,
+          createdAt: item.line.createdAt,
+          productId: item.line.productId,
+        }));
+
+      if (createdLines.length) {
+        this.natsClient.emit('line.create', createdLines);
+      }
+
+      if (linesIdsUpdated.length) {
+        this.natsClient.emit('line.update', linesIdsUpdated);
+      }
+
+      if (editPurchaseOrderDto.deleteLinesIds.length) {
+        this.natsClient.emit(
+          'line.delete',
+          editPurchaseOrderDto.deleteLinesIds,
+        );
+      }
 
       return purchaseOrderUpdated;
     } catch (error) {
